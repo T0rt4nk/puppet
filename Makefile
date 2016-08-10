@@ -5,11 +5,10 @@ all: build
 kernel = "$(PWD)/bin/ipxe.lkrn"
 kernel.virsh = "/tmp/ipxe.lkrn"
 
-iso = "$(HOME)/Downloads/archlinux-2016.08.01-dual.iso"
-mountpoint = "$(PWD)/iso"
+netboot = "$(PWD)/netboot"
 
-clean:
-	rm -rf "$(CURDIR)/bin/*"
+debian_url = "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/debian-installer/amd64"
+
 
 build:
 	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" ipxe
@@ -31,16 +30,21 @@ img.server:
 
 img: img.ipxe img.server
 
-run.virsh:
-	test -s /tmp/ipxe.lkrn && sudo rm $(kernel.virsh)
+run.virsh: clean.virsh
+	- test -s /tmp/ipxe.lkrn && sudo rm $(kernel.virsh)
 	cp $(kernel) $(kernel.virsh)
-	virt-install --name ipxe --memory 1024 --virt-type kvm --nodisks \
-		--boot kernel="/tmp/ipxe.lkrn" --network network=default
+	virt-install --name ipxe --memory 1024 --virt-type kvm \
+		--boot kernel="/tmp/ipxe.lkrn" --network network=default \
+		--disk size=10
 
 run.server:
-	mount |grep -q $(iso) || sudo mount -o loop,ro $(iso) $(mountpoint)
-	docker run -v "$(mountpoint):/mnt/iso" -p 5000:80 ipxe_server
+	wget -N -P $(netboot) $(debian_url)/linux
+	wget -N -P $(netboot) $(debian_url)/initrd.gz
+	docker run -v "$(netboot):/mnt/netboot" -p 5000:80 ipxe_server
+
+clean:
+	rm -rf "$(CURDIR)/bin/*"
 
 clean.virsh:
-	virsh destroy ipxe
-	virsh undefine ipxe
+	-virsh list | grep -q ipxe && virsh destroy ipxe
+	-virsh list --all | grep -q ipxe && virsh undefine ipxe

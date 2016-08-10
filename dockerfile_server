@@ -4,4 +4,4 @@ RUN apk add --update darkhttpd
 
 EXPOSE 80
 
-CMD darkhttpd /mnt/iso
+CMD darkhttpd /mnt/netboot

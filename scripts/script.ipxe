@@ -1,9 +1,12 @@
 #!ipxe
 
 dhcp
-set base-url http://192.168.2.42:5000/arch/boot/x86_64
 
-kernel ${base-url}/vmlinuz
-initrd ${base-url}/archiso.img
+set base-url http://192.168.2.42:5000
+
+set install_params auto=true priority=critical
+
+kernel ${base-url}/linux ${install_params}
+initrd ${base-url}/initrd.gz
 
 boot
