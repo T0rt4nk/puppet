@@ -7,8 +7,6 @@ RUN apk add --update alpine-sdk perl xz-dev syslinux bash && \
 
 WORKDIR /tmp/ipxe/src
 
-RUN sed -i 's/\/\/\(\#define PING_CMD.*\)/\1/' config/general.h
-
 ENTRYPOINT ["/usr/bin/make"]
 
 CMD []

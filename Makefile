@@ -11,14 +11,19 @@ mountpoint = "$(PWD)/iso"
 clean:
 	rm -rf "$(CURDIR)/bin/*"
 
-build: 
+build:
 	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" ipxe
+
+build.script:
+	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" \
+		-v "$(PWD)/scripts:/tmp/ipxe/src/scripts" ipxe \
+		bin/ipxe.lkrn EMBED=scripts/script.ipxe
 
 run:
 	qemu-system-x86_64 -enable-kvm -m 1G -kernel $(kernel)
 
 
-img.ipxe: 
+img.ipxe:
 	docker build -f dockerfile_ipxe -t ipxe .
 
 img.server:
@@ -27,13 +32,14 @@ img.server:
 img: img.ipxe img.server
 
 run.virsh:
-	rsync --chown max:max $(kernel) $(kernel.virsh)
+	test -s /tmp/ipxe.lkrn && sudo rm $(kernel.virsh)
+	cp $(kernel) $(kernel.virsh)
 	virt-install --name ipxe --memory 1024 --virt-type kvm --nodisks \
 		--boot kernel="/tmp/ipxe.lkrn" --network network=default
 
 run.server:
 	mount |grep -q $(iso) || sudo mount -o loop,ro $(iso) $(mountpoint)
-	docker run -v "$(mountpoint):/mnt/iso" ipxe_server
+	docker run -v "$(mountpoint):/mnt/iso" -p 5000:80 ipxe_server
 
 clean.virsh:
 	virsh destroy ipxe
