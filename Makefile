@@ -9,7 +9,6 @@ netboot = "$(PWD)/netboot"
 
 debian_url = "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/debian-installer/amd64"
 
-
 build:
 	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" ipxe
 
@@ -40,7 +39,7 @@ run.virsh: clean.virsh
 run.server:
 	wget -N -P $(netboot) $(debian_url)/linux
 	wget -N -P $(netboot) $(debian_url)/initrd.gz
-	docker run -v "$(netboot):/mnt/netboot" -p 5000:80 ipxe_server
+	docker run -v "$(netboot):/mnt/netboot" -p 5050:80 ipxe_server
 
 clean:
 	rm -rf "$(CURDIR)/bin/*"
@@ -48,3 +47,8 @@ clean:
 clean.virsh:
 	-virsh list | grep -q ipxe && virsh destroy ipxe
 	-virsh list --all | grep -q ipxe && virsh undefine ipxe
+
+cmd = "xargs virsh vol-delete --pool default "
+
+clean.volumes:
+	virsh vol-list default | awk 'NR > 2 && NF > 0 {system($(cmd) $$1)}'

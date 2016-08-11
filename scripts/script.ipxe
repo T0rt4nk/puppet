@@ -2,11 +2,14 @@
 
 dhcp
 
-set base-url http://192.168.2.42:5000
+set base-url http://192.168.2.42:5050
 
-set install_params auto=true priority=critical
+set install_params auto=true priority=critical url=${base-url}/preseed.cfg
 
-kernel ${base-url}/linux ${install_params}
-initrd ${base-url}/initrd.gz
+#kernel ${base-url}/linux ${install_params}
+#initrd ${base-url}/initrd.gz
+
+kernel ${base-url}/vmlinuz-grsec
+initrd ${base-url}/initramfs-grsec
 
 boot
