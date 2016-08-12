@@ -1,3 +1,4 @@
 *
 !.gitignore
 !preseed.cfg
+!ipxelinux.0

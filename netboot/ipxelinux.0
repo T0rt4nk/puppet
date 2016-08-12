@@ -1,0 +1,10 @@
+#!ipxe
+
+set install_params auto=true priority=critical url=${base-url}/preseed.cfg
+
+kernel ${base-url}/linux ${install_params}
+initrd ${base-url}/initrd.gz
+
+boot
+
+
