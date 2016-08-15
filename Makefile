@@ -29,7 +29,7 @@ img.server:
 
 img: img.ipxe img.server
 
-run.virsh: clean.virsh
+run.virsh: clean.virsh clean.volumes
 	- test -s /tmp/ipxe.lkrn && sudo rm $(kernel.virsh)
 	cp $(kernel) $(kernel.virsh)
 	virt-install --name ipxe --memory 1024 --virt-type kvm \
@@ -39,6 +39,7 @@ run.virsh: clean.virsh
 run.server:
 	wget -N -P $(netboot) $(debian_url)/linux
 	wget -N -P $(netboot) $(debian_url)/initrd.gz
+	cp "$(HOME)/.ssh/id_rsa.pub" $(CURDIR)/netboot
 	docker run -v "$(netboot):/mnt/netboot" -p 5050:80 ipxe_server
 
 clean:

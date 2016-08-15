@@ -2,3 +2,4 @@
 !.gitignore
 !preseed.cfg
 !ipxelinux.0
+!install.sh
