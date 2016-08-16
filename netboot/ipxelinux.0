@@ -1,9 +1,10 @@
 #!ipxe
 
-set base-url http://192.168.2.42:5050
-set instal-params auto=true priority=critical url=${base-url}/preseed.cfg DEBCONF_DEBUG=5
 
-kernel ${base-url}/linux ${instal-params}
+set base-url http://192.168.2.42:5050
+set install-params auto=true priority=critical url=${base-url}/preseed.cfg DEBCONF_DEBUG=5
+
+kernel ${base-url}/linux ${install-params}
 initrd ${base-url}/initrd.gz
 
 boot
