@@ -48,8 +48,8 @@ clean:
 	rm -rf "$(CURDIR)/bin/*"
 
 clean.virsh:
-	-virsh list | grep -q ipxe && virsh destroy ipxe
-	-virsh list --all | grep -q ipxe && virsh undefine ipxe
+	virsh list | awk '$$2 ~ /ipxe/ {system("virsh destroy " $$2)}'
+	virsh list --all | awk '$$2 ~ /ipxe/ {system("virsh undefine " $$2)}'
 
 clean.puppet:
 	rm -rf puppet/etc/code
@@ -61,7 +61,6 @@ ssh:
 	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
 		-i $(HOME)/.ssh/id_rsa tortank.debian.docker
 
-cmd = "xargs virsh vol-delete --pool default "
-
 clean.volumes:
-	virsh vol-list default | awk 'NR > 2 && NF > 0 {system($(cmd) $$1)}'
+	virsh vol-list default | awk \
+		'NR > 2 && NF > 0 {system("xargs virsh vol-delete --pool default " $$1)}'
