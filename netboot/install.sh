@@ -2,10 +2,50 @@
 set -x
 
 BASE_URL="http://192.168.2.42:5050"
-DEV=${DEV:-0}
+
+while getopts "d" OPTION
+do
+  case $OPTION in
+    d)
+      DEV=
+      ;;
+  esac
+done
+
+# setup source.list to something more compliant
+
+cat << EOF > /etc/apt/sources.list
+deb http://httpredir.debian.org/debian jessie main non-free contrib
+deb-src http://httpredir.debian.org/debian jessie main non-free contrib
+
+deb http://security.debian.org/ jessie/updates main contrib non-free
+deb-src http://security.debian.org/ jessie/updates main contrib non-free
+
+deb http://httpredir.debian.org/debian jessie-updates main contrib non-free
+deb-src http://httpredir.debian.org/debian jessie-updates main contrib non-free
+
+
+deb http://httpredir.debian.org/debian sid main contrib non-free
+deb-src http://httpredir.debian.org/debian sid main contrib non-free
+
+deb http://httpredir.debian.org/debian experimental main contrib non-free
+deb-src http://httpredir.debian.org/debian experimental main contrib non-free
+EOF
+
+cat << EOF > /etc/apt/preferences.d/debian-repos.pref
+Package: *
+Pin: release a=stable
+Pin-Priority: 550
+
+Package: *
+Pin: release a=unstable
+Pin-Priority: 450
+EOF
 
 # install required packages
-apt-get install -y puppet ssh curl
+apt-get update
+apt-get install -y ssh curl
+apt-get install -t sid -y puppet-agent
 
 # add ssh keys to user max
 keys="/home/max/.ssh/authorized_keys"
@@ -75,8 +115,15 @@ systemctl enable dnsdock
 
 
 # dev mode
-if [[ "$DEV" -e 1 ]]
+if [ -n "${DEV+set}" ]
 then
-    echo "dev mode"
 
+  cat << EOF > /root/puppet-agent
+#!/bin/sh
+set -x
+puppet agent --server puppet.docker --certname tortank.docker --waitforcert 60 --test
+EOF
+
+  chmod +x /root/puppet-agent
+  systemctl disable puppet-agent
 fi

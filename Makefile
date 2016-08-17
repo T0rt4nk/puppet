@@ -23,6 +23,9 @@ img.ipxe:
 img.server:
 	docker build -f dockerfile_server -t ipxe_server .
 
+img.puppet:
+	docker build -f dockerfile_puppet -t puppet .
+
 img: img.ipxe img.server
 
 run.virsh: clean.virsh clean.volumes
@@ -38,12 +41,21 @@ run.server:
 	cp "$(HOME)/.ssh/id_rsa.pub" $(CURDIR)/netboot
 	docker run -v "$(netboot):/mnt/netboot" -p 5050:80 ipxe_server
 
+run.puppet:
+	docker run -h puppet -v "$(PWD)/puppet:/home/puppet/.puppetlabs" --rm puppet
+
 clean:
 	rm -rf "$(CURDIR)/bin/*"
 
 clean.virsh:
 	-virsh list | grep -q ipxe && virsh destroy ipxe
 	-virsh list --all | grep -q ipxe && virsh undefine ipxe
+
+clean.puppet:
+	rm -rf puppet/etc/code
+	rm -rf puppet/etc/puppet/ssl
+	rm -rf puppet/opt
+	rm -rf puppet/var
 
 ssh:
 	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \

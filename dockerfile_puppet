@@ -1,0 +1,12 @@
+FROM alpine:3.4
+
+RUN apk --update add ruby vim
+
+RUN gem install --no-ri --no-rdoc puppet
+
+RUN adduser -D puppet
+
+WORKDIR /home/puppet
+USER puppet
+
+CMD puppet master --no-daemonize

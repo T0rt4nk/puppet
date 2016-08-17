@@ -1,0 +1,3 @@
+puppet/etc/puppet/ssl/
+puppet/opt/
+puppet/var
