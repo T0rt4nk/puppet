@@ -44,7 +44,7 @@ EOF
 
 # install required packages
 apt-get update
-apt-get install -y ssh curl
+apt-get install -y ssh curl make
 apt-get install -t sid -y puppet-agent
 
 # add ssh keys to user max
@@ -118,10 +118,11 @@ systemctl enable dnsdock
 if [ -n "${DEV+set}" ]
 then
 
-  cat << EOF > /root/puppet-agent
-#!/bin/sh
-set -x
-puppet agent --server puppet.docker --certname tortank.docker --waitforcert 60 --test
+  cat << EOF > /root/Makefile
+run:
+  puppet agent --server puppet.docker --certname tortank.docker --waitforcert 60 --test
+clean:
+  rm -rf /var/lib/puppet/ssl/*
 EOF
 
   chmod +x /root/puppet-agent
