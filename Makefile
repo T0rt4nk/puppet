@@ -1,27 +1,21 @@
 .PHONY: clean build run
 
-all: build
-
-kernel = "$(PWD)/bin/ipxe.lkrn"
-kernel.virsh = "/tmp/ipxe.lkrn"
-
 netboot = "$(PWD)/netboot"
-bin = $(CURDIR)/bin
+bin = /tmp/bin
 iso = /tmp/ipxe.iso
 
 debian_url = "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/debian-installer/amd64"
 
-build:
-	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" ipxe
+ensure_bin:
+	mkdir -p $(bin)
 
-build.script:
-	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" \
+build: ensure_bin
+	docker run -v "$(bin):/tmp/ipxe/src/bin" ipxe
+
+build.script: ensure_bin
+	docker run -v "$(bin):/tmp/ipxe/src/bin" \
 		-v "$(PWD)/scripts:/tmp/ipxe/src/scripts" ipxe \
 		bin/ipxe.iso EMBED=scripts/script.ipxe
-
-run:
-	qemu-system-x86_64 -enable-kvm -m 1G -kernel $(kernel)
-
 
 img.ipxe:
 	docker build -f dockerfile_ipxe -t ipxe .
