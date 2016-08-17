@@ -51,6 +51,13 @@ clean.virsh:
 	-virsh list | grep -q ipxe && virsh destroy ipxe
 	-virsh list --all | grep -q ipxe && virsh undefine ipxe
 
+ssh:
+	ip=$$( \
+	   virsh net-dhcp-leases default | \
+	   awk '$$6 ~ /tortank/ {print substr($$5, 1, length($$5)-3)}' \
+	); \
+	ssh -i $(HOME)/.ssh/id_rsa $$ip
+
 cmd = "xargs virsh vol-delete --pool default "
 
 clean.volumes:
