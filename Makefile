@@ -36,7 +36,7 @@ run.virsh: clean.virsh clean.volumes
 	cp $(bin)/ipxe.iso $(iso)
 	virt-install --name ipxe --memory 1024 --virt-type kvm \
 		--cdrom $(iso) --network network=default \
-        --disk size=10
+        --disk size=10 --noautoconsole
 
 run.server:
 	wget -N -P $(netboot) $(debian_url)/linux
@@ -52,12 +52,8 @@ clean.virsh:
 	-virsh list --all | grep -q ipxe && virsh undefine ipxe
 
 ssh:
-	ip=$$( \
-	   virsh net-dhcp-leases default | \
-	   awk '$$6 ~ /tortank/ {print substr($$5, 1, length($$5)-3)}' \
-	); \
 	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-		-i $(HOME)/.ssh/id_rsa $$ip
+		-i $(HOME)/.ssh/id_rsa tortank.debian.docker
 
 cmd = "xargs virsh vol-delete --pool default "
 
