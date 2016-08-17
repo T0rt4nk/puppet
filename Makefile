@@ -6,6 +6,8 @@ kernel = "$(PWD)/bin/ipxe.lkrn"
 kernel.virsh = "/tmp/ipxe.lkrn"
 
 netboot = "$(PWD)/netboot"
+bin = $(CURDIR)/bin
+iso = /tmp/ipxe.iso
 
 debian_url = "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/debian-installer/amd64"
 
@@ -15,7 +17,7 @@ build:
 build.script:
 	docker run -v "$(PWD)/bin:/tmp/ipxe/src/bin" \
 		-v "$(PWD)/scripts:/tmp/ipxe/src/scripts" ipxe \
-		bin/ipxe.lkrn EMBED=scripts/script.ipxe
+		bin/ipxe.iso EMBED=scripts/script.ipxe
 
 run:
 	qemu-system-x86_64 -enable-kvm -m 1G -kernel $(kernel)
@@ -30,11 +32,11 @@ img.server:
 img: img.ipxe img.server
 
 run.virsh: clean.virsh clean.volumes
-	- test -s /tmp/ipxe.lkrn && sudo rm $(kernel.virsh)
-	cp $(kernel) $(kernel.virsh)
+	sudo rm -f $(iso)
+	cp $(bin)/ipxe.iso $(iso)
 	virt-install --name ipxe --memory 1024 --virt-type kvm \
-		--boot kernel="/tmp/ipxe.lkrn" --network network=default \
-		--disk size=10
+		--cdrom $(iso) --network network=default \
+        --disk size=10
 
 run.server:
 	wget -N -P $(netboot) $(debian_url)/linux
