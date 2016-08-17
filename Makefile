@@ -56,7 +56,8 @@ ssh:
 	   virsh net-dhcp-leases default | \
 	   awk '$$6 ~ /tortank/ {print substr($$5, 1, length($$5)-3)}' \
 	); \
-	ssh -i $(HOME)/.ssh/id_rsa $$ip
+	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+		-i $(HOME)/.ssh/id_rsa $$ip
 
 cmd = "xargs virsh vol-delete --pool default "
 
