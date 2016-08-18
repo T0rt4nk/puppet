@@ -119,12 +119,16 @@ if [ -n "${DEV+set}" ]
 then
 
   cat << EOF > /root/Makefile
+all: run
+
 run:
-	puppet agent --server puppet.docker --certname tortank.docker --waitforcert 60 --test
+	puppet agent --server puppet.docker --certname tortank.docker \
+		--waitforcert 60 --onetime --verbose --no-daemonize \
+		--no-usecacheonfailure --no-splay --show_diff
+
 clean:
 	rm -rf /var/lib/puppet/ssl/*
 EOF
 
-  chmod +x /root/puppet-agent
   systemctl disable puppet-agent
 fi
