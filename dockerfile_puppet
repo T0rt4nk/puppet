@@ -1,6 +1,6 @@
 FROM alpine:3.4
 
-RUN apk --update add ruby vim
+RUN apk --update add ruby ca-certificates
 
 RUN gem install --no-ri --no-rdoc puppet
 

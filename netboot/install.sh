@@ -120,9 +120,9 @@ then
 
   cat << EOF > /root/Makefile
 run:
-  puppet agent --server puppet.docker --certname tortank.docker --waitforcert 60 --test
+	puppet agent --server puppet.docker --certname tortank.docker --waitforcert 60 --test
 clean:
-  rm -rf /var/lib/puppet/ssl/*
+	rm -rf /var/lib/puppet/ssl/*
 EOF
 
   chmod +x /root/puppet-agent
