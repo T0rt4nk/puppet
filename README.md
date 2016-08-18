@@ -30,10 +30,10 @@ by libvirt.
 Workflow
 --------
 
-*NOTE:* A lot of command will block your shells, this is normal and avoid doing
+**NOTE:** A lot of command will block your shells, this is normal and avoid doing
 too much things under the hood.
 
-`git clone --recursive https://github.com/T0rt4nk/setup tortank`
+`git clone --recursive https://github.com/T0rt4nk/puppet`
 clone the repository, then move into it (the make command needs to be run where
 the Makefile is).
 
@@ -82,7 +82,7 @@ no password needed here (thanks to `install.sh`).
 
 `make run.puppet.init` initialize the puppet master, with the `tortank` puppet
 module. This download the dependencies and symlink
-[tortank directory](./tortank) to puppet master.
+[tortank directory](https://github.com/T0rt4nk/puppet-module) to puppet master.
 
 `make run.puppet` start the puppet master container.
 
