@@ -4,6 +4,14 @@ netboot = "$(PWD)/netboot"
 bin = /tmp/bin
 iso = /tmp/ipxe.iso
 
+define puppet =
+docker run -h puppet --rm \
+	-v "$(PWD)/puppet:/home/puppet/.puppetlabs" \
+	-v "$(PWD)/tortank:/home/puppet/tortank" \
+	-ti puppet $(1)
+endef
+
+
 debian_url = "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/debian-installer/amd64"
 
 ensure_bin:
@@ -42,7 +50,13 @@ run.server:
 	docker run -v "$(netboot):/mnt/netboot" -p 5050:80 ipxe_server
 
 run.puppet:
-	docker run -h puppet -v "$(PWD)/puppet:/home/puppet/.puppetlabs" --rm puppet
+	$(call puppet,make run)
+
+run.puppet.edit:
+	$(call puppet,sh)
+
+run.puppet.init:
+	$(call puppet,make init)
 
 clean:
 	rm -rf "$(CURDIR)/bin/*"
@@ -52,7 +66,6 @@ clean.virsh:
 	virsh list --all | awk '$$2 ~ /ipxe/ {system("virsh undefine " $$2)}'
 
 clean.puppet:
-	rm -rf puppet/etc/code
 	rm -rf puppet/etc/puppet/ssl
 	rm -rf puppet/opt
 	rm -rf puppet/var
