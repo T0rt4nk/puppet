@@ -8,4 +8,4 @@ RUN adduser -D puppet
 
 WORKDIR /home/puppet
 USER puppet
-COPY makefile_puppet ./Makefile
+COPY Makefile .

@@ -1,40 +1,47 @@
-.PHONY: clean build run
-
-netboot = "$(PWD)/netboot"
+data = "$(PWD)/server/data"
 bin = /tmp/bin
 iso = /tmp/ipxe.iso
 
 define puppet =
 docker run -h puppet --rm \
-	-v "$(PWD)/puppet:/home/puppet/.puppetlabs" \
-	-v "$(PWD)/tortank:/home/puppet/tortank" \
+	-v "$(PWD)/puppet/puppetlabs:/home/puppet/.puppetlabs" \
+	-v "$(PWD)/puppet/tortank:/home/puppet/tortank" \
 	-ti puppet $(1)
 endef
 
 
 debian_url = "http://mirror.rackspace.com/debian/dists/stable/main/installer-amd64/current/images/netboot/debian-installer/amd64"
 
-ensure_bin:
+all: ensure clean img build.ipxe run.virsh
+
+ensure:
+	@echo "In order to make this environment work, be sure to have ran"
+	@echo "                                                           "
+	@echo "                    => make run.server                     "
+	@echo "                                                           "
+	@echo "in an other shell                                          "
+	@sudo echo "starting build..."
+
+ssh:
+	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
+		-i $(HOME)/.ssh/id_rsa tortank.debian.docker
+
+build.ipxe:
 	mkdir -p $(bin)
-
-build: ensure_bin
-	docker run -v "$(bin):/tmp/ipxe/src/bin" ipxe
-
-build.script: ensure_bin
 	docker run -v "$(bin):/tmp/ipxe/src/bin" \
-		-v "$(PWD)/scripts:/tmp/ipxe/src/scripts" ipxe \
-		bin/ipxe.iso EMBED=scripts/script.ipxe
+		-v "$(PWD)/ipxe:/tmp/ipxe/src/data" ipxe \
+		bin/ipxe.iso EMBED=data/script.ipxe
 
 img.ipxe:
-	docker build -f dockerfile_ipxe -t ipxe .
+	docker build -t ipxe ./ipxe
 
 img.server:
-	docker build -f dockerfile_server -t ipxe_server .
+	docker build -t server ./server
 
 img.puppet:
-	docker build -f dockerfile_puppet -t puppet .
+	docker build -t puppet ./puppet
 
-img: img.ipxe img.server
+img: img.server img.ipxe img.puppet
 
 run.virsh: clean.virsh clean.volumes
 	sudo rm -f $(iso)
@@ -44,10 +51,10 @@ run.virsh: clean.virsh clean.volumes
         --disk size=10 --noautoconsole
 
 run.server:
-	wget -N -P $(netboot) $(debian_url)/linux
-	wget -N -P $(netboot) $(debian_url)/initrd.gz
-	cp "$(HOME)/.ssh/id_rsa.pub" $(CURDIR)/netboot
-	docker run -v "$(netboot):/mnt/netboot" -p 5050:80 ipxe_server
+	wget -N -P $(data) $(debian_url)/linux
+	wget -N -P $(data) $(debian_url)/initrd.gz
+	cp "$(HOME)/.ssh/id_rsa.pub" $(data)
+	docker run -v "$(data):/srv/data" -p 5050:80 server
 
 run.puppet:
 	$(call puppet,make run)
@@ -58,21 +65,19 @@ run.puppet.edit:
 run.puppet.init:
 	$(call puppet,make init)
 
-clean:
-	rm -rf "$(CURDIR)/bin/*"
+clean: clean.ipxe clean.virsh clean.puppet clean.volumes
+
+clean.ipxe:
+	rm -rf "$(bin)/*"
 
 clean.virsh:
 	virsh list | awk '$$2 ~ /ipxe/ {system("virsh destroy " $$2)}'
 	virsh list --all | awk '$$2 ~ /ipxe/ {system("virsh undefine " $$2)}'
 
 clean.puppet:
-	rm -rf puppet/etc/puppet/ssl
-	rm -rf puppet/opt
-	rm -rf puppet/var
-
-ssh:
-	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-		-i $(HOME)/.ssh/id_rsa tortank.debian.docker
+	rm -rf puppet/puppetlabs/etc/puppet/ssl
+	rm -rf puppet/puppetlabs/puppet/opt
+	rm -rf puppet/puppetlabs/puppet/var
 
 clean.volumes:
 	virsh vol-list default | awk \
