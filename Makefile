@@ -6,6 +6,7 @@ define puppet =
 docker run -h puppet --rm \
 	-v "$(PWD)/puppet/puppetlabs:/home/puppet/.puppetlabs" \
 	-v "$(PWD)/puppet/tortank:/home/puppet/tortank" \
+	-v "$(PWD)/puppet/hiera:/var/lib/hiera" \
 	-ti puppet $(1)
 endef
 
