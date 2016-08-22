@@ -1,3 +1,4 @@
 etc/puppet/ssl/
+etc/puppet/keys/
 opt/
 var

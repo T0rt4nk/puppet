@@ -1,7 +1,13 @@
 ---
 :backends:
+  - eyaml
   - yaml
 :hierarchy:
   - common
 :yaml:
-   :datadir: /var/lib/hiera
+  :datadir: /var/lib/hiera
+:eyaml:
+  :datadir: /var/lib/hiera
+  :extension: 'yaml'
+  :pkcs7_private_key: /home/puppet/.puppetlabs/etc/puppet/keys/private_key.pkcs7.pem
+  :pkcs7_public_key: /home/puppet/.puppetlabs/etc/puppet/keys/public_key.pkcs7.pem
