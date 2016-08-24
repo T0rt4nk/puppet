@@ -91,13 +91,13 @@ IP=\$(/sbin/ip -4 -o addr show dev eth0| awk '{split(\$4,a,"/");print a[1]}')
 curl -s http://dnsdock.docker/services/tortank -X DELETE > /dev/null
 
 # Update the entry with the actualized IP address
-curl http://dnsdock.docker/services/tortank -X PUT --data-ascii \
+curl -s http://dnsdock.docker/services/tortank -X PUT --data-ascii \
   '{"name": "tortank", "image": "debian", "ip": "'\$IP'", "ttl": 30}'
 
 EOF
 chmod +x /usr/local/bin/dnsdock
 
-cat << EOF > /etc/systemd/system/dnsdock.service
+cat << EOF > /etc/systemd/system/dnsdev.service
 [Unit]
 Description=Register to docker DNS service
 After=network.target
@@ -111,7 +111,7 @@ ExecStart=/usr/local/bin/dnsdock
 WantedBy=multi-user.target
 EOF
 
-systemctl enable dnsdock
+systemctl enable dnsdev
 
 
 # dev mode
