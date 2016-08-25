@@ -2,6 +2,12 @@ data = "$(PWD)/server/data"
 bin = /tmp/bin
 iso = /tmp/ipxe.iso
 
+ifdef SSH_IP
+	ssh_ip = $(SSH_IP)
+else
+	ssh_ip = "tortank.debian.docker"
+endif
+
 define puppet =
 docker run -h puppet --rm \
 	-v "$(PWD)/puppet/puppetlabs:/home/puppet/.puppetlabs" \
@@ -25,7 +31,7 @@ ensure:
 
 ssh:
 	ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null \
-		-i $(HOME)/.ssh/id_rsa tortank.debian.docker
+		-i $(HOME)/.ssh/id_rsa $(ssh_ip)
 
 build.ipxe:
 	mkdir -p $(bin)
@@ -49,7 +55,7 @@ run.virsh: clean.virsh clean.volumes
 	cp $(bin)/ipxe.iso $(iso)
 	virt-install --name ipxe --memory 1024 --virt-type kvm \
 		--cdrom $(iso) --network network=default \
-        --disk size=10 --noautoconsole
+        --disk size=10
 
 run.server:
 	wget -N -P $(data) $(debian_url)/linux
@@ -77,8 +83,8 @@ clean.virsh:
 
 clean.puppet:
 	rm -rf puppet/puppetlabs/etc/puppet/ssl
-	rm -rf puppet/puppetlabs/puppet/opt
-	rm -rf puppet/puppetlabs/puppet/var
+	rm -rf puppet/puppetlabs/opt
+	rm -rf puppet/puppetlabs/var
 
 clean.volumes:
 	virsh vol-list default | awk \

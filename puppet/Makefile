@@ -9,3 +9,9 @@ init:
 	puppet module install tortank/pkg/rulz-tortank-0.1.0.tar.gz
 	rm -rf $(module)
 	cd $$(dirname $(module)) && ln -s ../../../../../../tortank
+
+clean:
+	rm -rf .puppetlabs/etc/puppet/ssl
+	rm -rf .puppetlabs/opt
+	rm -rf .puppetlabs/var
+
