@@ -127,7 +127,8 @@ run:
 		--no-usecacheonfailure --no-splay --show_diff
 
 clean:
-	rm -rf /var/lib/puppet/ssl/*
+	rm -rf /var/lib/puppet/*
+	rm -rf /var/cache/puppet/*
 EOF
 
   systemctl disable puppet-agent
