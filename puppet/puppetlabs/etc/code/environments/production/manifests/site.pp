@@ -1,3 +1,1 @@
-node tortank.docker {
-  include tortank
-}
+include tortank

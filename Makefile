@@ -9,7 +9,8 @@ else
 endif
 
 define puppet =
-docker run -h puppet --rm \
+docker run -h puppet --rm -p 8140:8140\
+	--add-host="tortank:192.168.2.51" \
 	-v "$(PWD)/puppet/puppetlabs:/home/puppet/.puppetlabs" \
 	-v "$(PWD)/puppet/tortank:/home/puppet/tortank" \
 	-v "$(PWD)/puppet/hiera:/var/lib/hiera" \
@@ -37,7 +38,7 @@ build.ipxe:
 	mkdir -p $(bin)
 	docker run -v "$(bin):/tmp/ipxe/src/bin" \
 		-v "$(PWD)/ipxe:/tmp/ipxe/src/data" ipxe \
-		bin/ipxe.iso EMBED=data/script.ipxe
+		bin/ipxe.usb EMBED=data/script.ipxe
 
 img.ipxe:
 	docker build -t ipxe ./ipxe

@@ -6,6 +6,8 @@ RUN gem install --no-ri --no-rdoc puppet hiera-eyaml
 
 RUN adduser -D puppet
 
-WORKDIR /home/puppet
+EXPOSE 8140
+
 USER puppet
+WORKDIR /home/puppet
 COPY Makefile .

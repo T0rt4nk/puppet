@@ -64,55 +64,7 @@ cat << EOF >> /etc/sudoers
 max ALL=(ALL) NOPASSWD:ALL
 EOF
 
-
-# add docker resolver to resolv.conf
-cat << EOF > /etc/resolv.conf
-nameserver 172.17.0.1
-nameserver 192.168.122.1
-EOF
-
-# prevent dhclient from overriding resolv.conf
-cat << EOF > /etc/dhcp/dhclient-enter-hooks.d/nodnsupdate
-#!/bin/sh
-make_resolv_conf() {
-    :
-}
-EOF
-chmod +x /etc/dhcp/dhclient-enter-hooks.d/nodnsupdate
-
-# create a script and a systemd entry to register tortank into dnsdock
-cat << EOF > /usr/local/bin/dnsdock
-#!/bin/sh
-
-# Get current IP address
-IP=\$(/sbin/ip -4 -o addr show dev eth0| awk '{split(\$4,a,"/");print a[1]}')
-
-# Try to remove tortank entry
-curl -s http://dnsdock.docker/services/tortank -X DELETE > /dev/null
-
-# Update the entry with the actualized IP address
-curl -s http://dnsdock.docker/services/tortank -X PUT --data-ascii \
-  '{"name": "tortank", "image": "debian", "ip": "'\$IP'", "ttl": 30}'
-
-EOF
-chmod +x /usr/local/bin/dnsdock
-
-cat << EOF > /etc/systemd/system/dnsdev.service
-[Unit]
-Description=Register to docker DNS service
-After=network.target
-Requires=network.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/local/bin/dnsdock
-
-[Install]
-WantedBy=multi-user.target
-EOF
-
-systemctl enable dnsdev
-
+echo "192.168.2.42 puppet" >> /etc/hosts
 
 # dev mode
 if [ -n "${DEV+set}" ]
@@ -122,7 +74,7 @@ then
 all: run
 
 run:
-	puppet agent --server puppet.docker --certname tortank.docker \\
+	puppet agent --server puppet \\
 		--waitforcert 60 --onetime --verbose --no-daemonize \\
 		--no-usecacheonfailure --no-splay --show_diff
 
